@@ -109,6 +109,11 @@ cgr <- function(obj, lambda = NULL, n.lambda = 100,
         
         # now a larger sequence but just between those
         min_lam=min(sub_lam)
+        # for bad estimates
+        if(length(sub_lam) == 0){
+          lambda <- 10^2
+          message("cannot estimate lambda. model uses lambda = 10^2 instead")
+        }
         if(min_lam>0){
           lambda = 10^c( seq(log10(min_lam), log10(max(sub_lam)), length.out = n.lambda))
         } else{
