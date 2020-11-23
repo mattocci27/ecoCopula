@@ -15,6 +15,7 @@
 #' (optional, see detail)
 #' @param method method for selecting shrinkage parameter lambda, either "BIC" (default) or "AIC"
 #' @param seed integer (default = 1), seed for random number generation (optional, see detail)
+#' @param cor logical (default = FALSE), if TRUE use cor0 else use cov0
 #' @section Details:
 #' \code{cgr} is used to fit a Gaussian copula graphical model to multivariate discrete data, such as co-occurrence (multi species) data in ecology. The model is estimated using importance sampling with \code{n.samp} sets of randomised quantile or "Dunn-Smyth" residuals (Dunn & Smyth 1996), and the \code{\link{glasso}} package for fitting Gaussian graphical models. Models are fit for a path of values of the shrinkage parameter \code{lambda} chosen so that both completely dense and sparse models are fit. The \code{lambda} value for the \code{best_graph} is chosen by BIC (default) or AIC.  The seed is controlled so that models with the same data and different predictors can be compared.  
 #' @return Three objects are returned; 
@@ -38,7 +39,7 @@
 #' @import mvabund
 #' @export 
 cgr <- function(obj, lambda = NULL, n.lambda = 100, 
-                  n.samp = 500, method="BIC", seed = NULL) {
+                  n.samp = 500, method="BIC", seed = NULL, cor = FALSE) {
     
   # code chunk from simulate.lm to select seed
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) 
@@ -77,7 +78,7 @@ cgr <- function(obj, lambda = NULL, n.lambda = 100,
     set.seed(seed)
     
     # simulate full set of residuals n.samp times
-    res = simulate.res.S(obj, n.res = n.samp)
+    res = simulate.res.S(obj, n.res = n.samp, cor = cor)
     
     #this chunk of code finds a path of lambda values to 
     #explore graphs ranging from completely sparse to completely dense.
@@ -256,7 +257,9 @@ glasso_opt = function(rho, S.list, full = FALSE, quick = FALSE, start = "cold", 
   array.S = array(unlist(S.list), c(P, P, J)) 
   
   #initialize covariance and weights
-  S.init = cov2cor(apply(array.S, c(1, 2), mean)) 
+  S.init <- cov2cor(apply(array.S, c(1, 2), mean))
+  #if (cor == FALSE) S.init <- cov2cor(S.init)
+
   weights = rep(1, J)/J 
   
   #starting parameters if warm start
@@ -295,6 +298,7 @@ glasso_opt = function(rho, S.list, full = FALSE, quick = FALSE, start = "cold", 
       
       #recalculate weighted covariance matrix
       Sigma.gl[[count]] = cov2cor(apply(array.S, c(1, 2), weighted.mean, w = weights))
+      #if (cor == FALSE) Sigma.gl[[count]] = cov2cor(Sigma.gl[[count]])
       
       #fit glasso and extract estimates
       A = suppressWarnings(glasso::glasso(Sigma.gl[[count]], rho = rho, penalize.diagonal = FALSE, thr = 1e-08, 

@@ -10,7 +10,8 @@ cgr(
   n.lambda = 100,
   n.samp = 500,
   method = "BIC",
-  seed = NULL
+  seed = NULL,
+  cor = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ for model selection (default = 100), ignored if lambda supplied}
 \item{method}{method for selecting shrinkage parameter lambda, either "BIC" (default) or "AIC"}
 
 \item{seed}{integer (default = 1), seed for random number generation (optional, see detail)}
+
+\item{cor}{logical (default = FALSE), if TRUE use cor0 else use cov0}
 }
 \value{
 Three objects are returned; 

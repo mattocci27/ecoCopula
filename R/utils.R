@@ -9,9 +9,10 @@ utils::globalVariables(c("cov2cor", "factanal", "weighted.mean","coef","plot",
 #'
 #' @param obj manyglm or stackesdm object
 #' @param n.res number of residual sets to simulate
+#' @param cor logical; if TRUE, use cor0 else use cov0
 #'
 #' @noRd
-simulate.res.S <- function(obj, n.res = 200) {
+simulate.res.S <- function(obj, n.res = 200, cor = FALSE) {
 
     many.obj = list(obj)[rep(1, n.res)]
     res = plyr::llply(many.obj, residuals)
@@ -21,8 +22,11 @@ simulate.res.S <- function(obj, n.res = 200) {
     if (min(res[[1]]) > -1e-05) {
         res = plyr::llply(res, qnorm)
     }
-    
-    S.list = plyr::llply(res, function(x) cov2cor(cov0(x)))  #cov0 assumes 0 mean
+    if (cor) {
+      S.list = plyr::llply(res, function(x) cor0(x, obj))  #cov0 assumes 0 mean
+    } else {
+      S.list = plyr::llply(res, function(x) cov2cor(cov0(x)))  #cov0 assumes 0 mean
+    }
     return(list(res = res, S.list = S.list))
 }
 
@@ -44,12 +48,13 @@ cov0 = function(Y) {
 #' empirical correlaiton matrix
 #'
 #' @param x residual matrix
-#' @param dat original data matrix
+#' @param obj manyglm or stackesdm object
 #'
 #' @noRd
-cor0 <- function(x, dat){
+cor0 <- function(x, obj){
   n <- dim(x)[2]
   S <- matrix(numeric(n^2), nrow = n)
+  dat <- obj$y
   colnames(S) <- rownames(S) <- colnames(x)
   for (i in 1:n) {
     for (j in 1:n) {

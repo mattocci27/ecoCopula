@@ -1,9 +1,11 @@
 ```
-docker build -t ecocopula:4.0.3 ./docker
 
-docker run --rm -it -u rstudio \
-  -v $(pwd):/home/rstudio/ecoCopula \
+docker build -t ecocopula:4.0.3 ./docker --build-arg USER_NAME=mattocci
+
+docker run --rm -it -u mattocci \
+  -v $(pwd):/home/mattocci/ecoCopula \
   ecocopula:4.0.3 bash
+
 ```
 
 
@@ -18,6 +20,48 @@ roxygen2::roxygenise()
 #devtools::build_vignettes()
 #devtools::build_manual(".")
 #devtools::build(".")
+tic()
 devtools::check(".", manual = TRUE)
+toc()
+
+tic()
+devtools::check(".", 
+                vignettes = FALSE,
+                manual = FALSE
+)
+toc()
 
 ```
+
+```{r}
+library(mvabund)
+X <- as.data.frame(spider$x)
+abund <- spider$abund[,1:5]
+obj <- stackedsdm(abund,~1, data = X, ncores=2) 
+
+
+cgr(obj)
+
+cgr(obj, cor = FALSE)
+
+
+res = simulate.res.S(obj, n.res = 3, cor = FALSE)
+res2 = simulate.res.S(obj, n.res = 3, cor = TRUE)
+
+res$S.list
+res2$S.list
+
+S.list <- res2$S.list
+
+P = dim(S.list[[1]])[1]
+J = length(S.list)
+eps = 1e-3
+maxit = 10
+  #list of correlation of each set of residuals
+array.S = array(unlist(S.list), c(P, P, J)) 
+
+S.init <- apply(array.S, c(1, 2), mean)
+S.init2 <- cov2cor(S.init)
+
+```
+
