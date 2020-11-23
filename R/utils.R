@@ -38,6 +38,30 @@ cov0 = function(Y) {
     (t(Y) %*% Y)/(n - 1)
 }
 
+
+#' Cor without join-absence
+#'
+#' empirical correlaiton matrix
+#'
+#' @param x residual matrix
+#' @param dat original data matrix
+#'
+#' @noRd
+cor0 <- function(x, dat){
+  n <- dim(x)[2]
+  S <- matrix(numeric(n^2), nrow = n)
+  colnames(S) <- rownames(S) <- colnames(x)
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i != j) {
+        tmp <- which(dat[, i] != 0 | dat[, j] != 0)
+        S[i, j]  <- cor(x[tmp, i], x[tmp, j])
+      } else S[i, j] <- 1
+    }
+  }
+  S
+}
+
 #' multiple log likelihood 
 #'
 #' Calculate log likelihood with multiple empirical covariance matrices and one estimated precision

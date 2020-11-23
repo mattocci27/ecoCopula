@@ -1,0 +1,23 @@
+```
+docker build -t ecocopula:4.0.3 ./docker
+
+docker run --rm -it -u rstudio \
+  -v $(pwd):/home/rstudio/ecoCopula \
+  ecocopula:4.0.3 bash
+```
+
+
+```{r}
+
+install.packages(c('betareg','glm2','ordinal'), dependencies = TRUE)
+
+install.packages('rle', dependencies = TRUE)
+install.packages('dbplyr', dependencies = TRUE)
+
+roxygen2::roxygenise()
+#devtools::build_vignettes()
+#devtools::build_manual(".")
+#devtools::build(".")
+devtools::check(".", manual = TRUE)
+
+```
