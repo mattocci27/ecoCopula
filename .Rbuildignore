@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^CRAN-RELEASE$
 ^cran-comments\.md$
+note.Rmd
+bad_dat.csv

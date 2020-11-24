@@ -101,20 +101,20 @@ cgr <- function(obj, lambda = NULL, n.lambda = 100,
         #then find the sweet spot by removing the 5 largest of the 10 values above
         if(method=="BIC"){
           sub_lam=lambda[sparse_fits$BIC<kth_largest(sparse_fits$BIC,5)]
-        }else if (method=="AIC"){
+        } else if (method=="AIC"){
           sub_lam=lambda[sparse_fits$AIC<kth_largest(sparse_fits$AIC,5)]
         }else{
           stop("lambda selection method can only be \"AIC\" or \"BIC\" ")
         }
-        
+
         # now a larger sequence but just between those
-        min_lam=min(sub_lam)
+        if(length(sub_lam) != 0) min_lam=min(sub_lam)
+
         # for bad estimates
         if(length(sub_lam) == 0){
           lambda <- 10^2
-          message("cannot estimate lambda. model uses lambda = 10^2 instead")
-        }
-        if(min_lam>0){
+          message("cannot estimate lambda. sparse matrix seems to be the best. model uses lambda = 10^2 instead")
+        } else if(min_lam>0){
           lambda = 10^c( seq(log10(min_lam), log10(max(sub_lam)), length.out = n.lambda))
         } else{
           min_lam=min(sub_lam[sub_lam>0])
